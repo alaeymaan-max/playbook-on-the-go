@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Playbook - Your Personal PDF Reader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+
+  <!-- ===== SPLASH / UPLOAD SCREEN ===== -->
+  <div id="splash-screen" class="splash-screen active">
+    <div class="splash-bg">
+      <div class="bg-orb orb-1"></div>
+      <div class="bg-orb orb-2"></div>
+      <div class="bg-orb orb-3"></div>
+      <div class="noise-overlay"></div>
+    </div>
+
+    <div class="splash-content">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <rect x="4" y="2" width="22" height="28" rx="3" fill="none" stroke="#C9A84C" stroke-width="2"/>
+            <rect x="8" y="6" width="22" height="28" rx="3" fill="none" stroke="#C9A84C" stroke-width="2" opacity="0.4"/>
+            <line x1="9" y1="10" x2="21" y2="10" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="9" y1="14" x2="21" y2="14" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="9" y1="18" x2="17" y2="18" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1 class="brand-name">Playbook</h1>
+      </div>
+      <p class="brand-tagline">Your personal research library, always with you.</p>
+
+      <!-- Upload Drop Zone -->
+      <div class="upload-zone" id="upload-zone">
+        <div class="upload-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="23" stroke="#C9A84C" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <path d="M24 32V18M24 18L18 24M24 18L30 24" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 34H32" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          </svg>
+        </div>
+        <p class="upload-label">Drop your PDF here</p>
+        <p class="upload-sub">or click to browse</p>
+        <input type="file" id="file-input" accept=".pdf" hidden />
+      </div>
+
+      <!-- Library Grid -->
+      <div class="library-section" id="library-section">
+        <div class="library-header">
+          <h2 class="library-title">Your Library</h2>
+          <button class="btn-clear-all" id="btn-clear-all">Clear All</button>
+        </div>
+        <div class="library-grid" id="library-grid">
+          <!-- JS populates this -->
+        </div>
+        <p class="empty-library" id="empty-library">No PDFs yet. Upload your first one above.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== READER SCREEN ===== -->
+  <div id="reader-screen" class="reader-screen">
+
+    <!-- Top Bar -->
+    <header class="reader-header">
+      <button class="btn-icon" id="btn-back" title="Back to Library">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="header-title-group">
+        <span class="header-doc-title" id="header-doc-title">Document</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" id="btn-search-toggle" title="Search">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="btn-toc-toggle" title="Table of Contents">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <line x1="3" y1="5" x2="15" y2="5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="3" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="3" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="btn-notes-toggle" title="Notes">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect x="3" y="2" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <line x1="6" y1="6" x2="12" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="6" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="6" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-bar" id="search-bar">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <input type="text" id="search-input" placeholder="Search in document..." autocomplete="off"/>
+      <span class="search-count" id="search-count"></span>
+      <button class="btn-icon sm" id="btn-search-prev">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M9 3L5 7L9 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="btn-icon sm" id="btn-search-next">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M5 3L9 7L5 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="btn-icon sm" id="btn-search-close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="reader-layout">
+
+      <!-- Sidebar: TOC -->
+      <aside class="sidebar sidebar-left" id="sidebar-toc">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Contents</span>
+          <button class="btn-icon sm" id="btn-toc-close">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="toc-list" id="toc-list">
+          <p class="toc-empty">No outline available for this PDF.</p>
+        </div>
+        <!-- Thumbnail navigator -->
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-sub-title">Pages</div>
+        <div class="thumbnail-strip" id="thumbnail-strip"></div>
+      </aside>
+
+      <!-- PDF Canvas Area -->
+      <main class="pdf-viewport" id="pdf-viewport">
+        <div class="pdf-container" id="pdf-container">
+          <!-- Pages rendered by JS -->
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading-overlay" id="loading-overlay">
+          <div class="loader-ring"></div>
+          <p>Loading document...</p>
+        </div>
+      </main>
+
+      <!-- Sidebar: Notes -->
+      <aside class="sidebar sidebar-right" id="sidebar-notes">
+        <div class="sidebar-header">
+          <span class="sidebar-title">My Notes</span>
+          <button class="btn-icon sm" id="btn-notes-close">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="notes-area">
+          <textarea class="notes-textarea" id="notes-textarea" placeholder="Write your notes, thoughts, and research here..."></textarea>
+          <div class="notes-footer">
+            <span class="notes-saved" id="notes-saved">Saved</span>
+            <span class="notes-char-count" id="notes-char-count">0 chars</span>
+          </div>
+        </div>
+        <div class="highlights-section">
+          <div class="sidebar-sub-title">Highlights</div>
+          <div class="highlights-list" id="highlights-list">
+            <p class="highlights-empty" id="highlights-empty">Select text on the PDF to highlight it.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Bottom Toolbar -->
+    <footer class="reader-footer">
+      <button class="btn-icon" id="btn-prev-page" title="Previous Page">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L6 9L11 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="page-info">
+        <input type="number" class="page-input" id="page-input" min="1" value="1" />
+        <span class="page-divider">/</span>
+        <span class="page-total" id="page-total">--</span>
+      </div>
+
+      <button class="btn-icon" id="btn-next-page" title="Next Page">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M7 4L12 9L7 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="toolbar-sep"></div>
+
+      <button class="btn-icon" id="btn-zoom-out" title="Zoom Out">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.8"/>
+          <line x1="5.5" y1="8" x2="10.5" y2="8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <span class="zoom-label" id="zoom-label">100%</span>
+      <button class="btn-icon" id="btn-zoom-in" title="Zoom In">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.8"/>
+          <line x1="8" y1="5.5" x2="8" y2="10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="5.5" y1="8" x2="10.5" y2="8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="toolbar-sep"></div>
+
+      <button class="btn-icon" id="btn-bookmark" title="Bookmark Page">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" id="bookmark-icon">
+          <path d="M5 3H13C13.5523 3 14 3.44772 14 4V16L9 12.5L4 16V4C4 3.44772 4.44772 3 5 3Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <button class="btn-highlight-mode" id="btn-highlight-mode" title="Highlight Mode">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 13L5 10L11 4L13 6L7 12L4 13H2L2 13Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <line x1="9" y1="6" x2="11" y2="8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Highlight
+      </button>
+    </footer>
+
+    <!-- Highlight Context Menu -->
+    <div class="highlight-menu" id="highlight-menu">
+      <button class="hl-btn yellow" data-color="#F5C842" title="Yellow"></button>
+      <button class="hl-btn green" data-color="#4CAF82" title="Green"></button>
+      <button class="hl-btn blue" data-color="#4C8EAF" title="Blue"></button>
+      <button class="hl-btn red" data-color="#AF4C4C" title="Red"></button>
+      <button class="hl-btn-action" id="hl-add-note">Note</button>
+      <button class="hl-btn-action danger" id="hl-remove">Remove</button>
+    </div>
+
+    <!-- Note Popup -->
+    <div class="note-popup" id="note-popup">
+      <textarea class="note-popup-input" id="note-popup-input" placeholder="Add a note to this highlight..."></textarea>
+      <div class="note-popup-actions">
+        <button class="btn-primary sm" id="note-popup-save">Save</button>
+        <button class="btn-ghost sm" id="note-popup-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
